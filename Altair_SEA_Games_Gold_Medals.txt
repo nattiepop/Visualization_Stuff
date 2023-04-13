@@ -1,0 +1,53 @@
+import altair as alt
+import pandas as pd
+
+data = pd.read_csv('https://bit.ly/seagamesdata')
+
+data['year'] = data['year'].astype('str')
+
+brush = alt.selection_interval(encodings = ['x'], empty = 'all')
+
+rect = alt.Chart(
+    data,
+    title="SEA Games Gold Medals"
+).mark_rect().encode(
+    x='year',
+    y='name',
+    color=alt.Color('gold:Q', scale=alt.Scale(scheme="lighttealblue"), title='Gold Madels'),
+    tooltip=[
+        alt.Tooltip('year', title='Year'),
+        alt.Tooltip('gold', title='Gold Madels')
+    ]
+).properties(width=550
+).add_selection(
+    brush
+)
+
+points = alt.Chart(data).mark_circle(
+    opacity = 0.8,
+    stroke = 'black',
+    strokeWidth = 1
+).encode(
+    alt.X('year', title = 'Year'),
+    alt.Y('name', title = None),
+    alt.Size('host', 
+             scale = alt.Scale(range = [0, 5]),
+             legend = alt.Legend(title = 'Host Nation', direction="horizontal", labelColor="white"))
+)
+
+bars = alt.Chart(data).mark_bar(
+).encode(
+    alt.Y('name', title = None),
+    alt.X('gold', title = 'Gold Medals')
+).transform_filter(
+    brush
+).properties(
+    width = 550,
+    height = 200
+)
+
+alt.vconcat(
+    rect + points,
+    bars,
+    data = data
+)
